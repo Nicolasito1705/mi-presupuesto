@@ -1,0 +1,3 @@
+# Only people who have the link should find this.
+User-agent: *
+Disallow: /

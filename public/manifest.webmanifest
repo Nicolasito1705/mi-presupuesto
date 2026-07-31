@@ -1,0 +1,13 @@
+{
+  "name": "Mi Presupuesto",
+  "short_name": "Presupuesto",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f3f6",
+  "theme_color": "#f3f3f6",
+  "lang": "es",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

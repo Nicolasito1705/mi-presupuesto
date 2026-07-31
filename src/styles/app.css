@@ -1,0 +1,76 @@
+/* App-level theme layer. Everything here is lifted verbatim from the
+   `Mi Presupuesto.dc.html` prototype's <helmet> block so the two render
+   identically; Nocturne's tokens underneath it are untouched. */
+
+body { margin: 0; }
+
+[data-theme] {
+  --mp-c1: #b5abfc;
+  --mp-c2: #e4e7f5;
+  --mp-c3: #5d5294;
+  --mp-c4: #75798c;
+  --mp-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+
+[data-theme="light"] {
+  --color-bg: #f3f3f6;
+  --color-surface: #ffffff;
+  --color-text: #262838;
+  --color-accent: #7a6cc4;
+  --color-divider: color-mix(in srgb, #262838 12%, transparent);
+  --shadow-sm: 0 0 0 1px #e8e9f1;
+  --shadow-md: 0 0 0 1px #e0e1ec, 0 6px 18px rgba(30, 32, 60, 0.08);
+  --shadow-lg: 0 0 0 1px #d4d6e4, 0 16px 40px rgba(30, 32, 60, 0.12);
+  --mp-c1: #6d61a8;
+  --mp-c2: #b5abfc;
+  --mp-c3: #292b31;
+  --mp-c4: #9397ab;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--color-text) 35%, transparent);
+}
+
+@keyframes mpFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* The prototype wrote hover states with `style-hover`, a Design Components
+   feature. In React they become classes — same declarations. */
+.mp-h-accent12:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
+.mp-h-accent8:hover  { background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
+.mp-h-soft4:hover    { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
+.mp-h-soft7:hover    { background: color-mix(in srgb, var(--color-text) 7%, transparent); color: var(--color-text); }
+
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Native date inputs render a light-on-light glyph in the dark theme. */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.55;
+}
+
+/* Hide the number spinners — the design shows a bare numeric field. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* The prototype always sits inside a 402×874 iPhone frame. That is right on a
+   desktop, but on an actual phone the frame would be a box inside a box — so
+   below 480px the frame drops away and the screen goes full-bleed. */
+.mp-stage {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  padding: 28px;
+  font-family: var(--font-body);
+}
+
+@media (max-width: 480px) {
+  .mp-stage { padding: 0; align-items: stretch; }
+}

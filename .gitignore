@@ -1,0 +1,10 @@
+node_modules
+dist
+.vercel
+.env
+.env.local
+.DS_Store
+*.log
+
+# Ajustes locales del editor/agente — no van al repositorio
+.claude/settings.local.json

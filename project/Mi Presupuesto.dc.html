@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/nocturne-def462dc-fe4c-4044-89f6-6be4d933e043/styles.css">
+  <script src="_ds/nocturne-def462dc-fe4c-4044-89f6-6be4d933e043/_ds_bundle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <style>
+    body{margin:0}
+    [data-theme]{--mp-c1:#b5abfc;--mp-c2:#e4e7f5;--mp-c3:#5d5294;--mp-c4:#75798c;--mp-muted:color-mix(in srgb,var(--color-text) 55%, transparent)}
+    [data-theme="light"]{--color-bg:#f3f3f6;--color-surface:#ffffff;--color-text:#262838;--color-accent:#7a6cc4;--color-divider:color-mix(in srgb,#262838 12%, transparent);--shadow-sm:0 0 0 1px #e8e9f1;--shadow-md:0 0 0 1px #e0e1ec,0 6px 18px rgba(30,32,60,0.08);--shadow-lg:0 0 0 1px #d4d6e4,0 16px 40px rgba(30,32,60,0.12);--mp-c1:#6d61a8;--mp-c2:#b5abfc;--mp-c3:#292b31;--mp-c4:#9397ab}
+    input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--color-text) 35%, transparent)}
+    @keyframes mpFadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</helmet>
+<div data-theme="{{ themeName }}" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--color-bg);padding:28px;font-family:var(--font-body)">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" hint-size="402px,874px">
+  <div style="height:100%;display:flex;flex-direction:column;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);position:relative">
+    <div style="flex:1;overflow-y:auto;padding:64px 16px 12px;display:flex;flex-direction:column">
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Dashboard" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px">
+            <div>
+              <div style="font-size:12px;color:var(--mp-muted)">Mi presupuesto</div>
+              <div style="font-family:var(--font-heading);font-weight:500;font-size:24px;letter-spacing:-0.015em">{{ monthName }}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button onClick="{{ toggleTheme }}" aria-label="Cambiar tema" style="width:44px;height:44px;border-radius:10px;border:1px solid var(--color-divider);background:transparent;color:var(--mp-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ph {{ themeIcon }}"></i></button>
+              <button onClick="{{ askClose }}" style="height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">Cerrar mes</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:12px">
+              <div style="font-size:11px;color:var(--mp-muted)">Ingresos</div>
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-top:2px">{{ incomeFmt }}</div>
+            </div>
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:12px">
+              <div style="font-size:11px;color:var(--mp-muted)">Gastos</div>
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-top:2px">{{ expenseFmt }}</div>
+            </div>
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:12px">
+              <div style="font-size:11px;color:var(--mp-muted)">Balance</div>
+              <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;margin-top:2px;color:var(--color-accent)">{{ balanceFmt }}</div>
+            </div>
+          </div>
+
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;display:flex;align-items:center;gap:18px">
+            <div style="width: 128px; height: 128px; border-radius: 50%; background: {{ donutGradient }}; position: relative; flex: none; overflow: visible">
+              <div style="position:absolute;inset:16px;border-radius:50%;background:var(--color-surface);display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-size:10px;color:var(--mp-muted)">Gastado</div>
+                <div style="font-size:15px;font-weight:600;letter-spacing:-0.01em">{{ expenseFmt }}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;flex:1;min-width:0">
+              <sc-for list="{{ catRows }}" as="c" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:8px;font-size:12.5px">
+                  <span style="width:9px;height:9px;border-radius:3px;background:{{ c.color }};flex:none"></span>
+                  <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+                  <span style="color:var(--mp-muted)">{{ c.pct }}%</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:6px 0">
+            <div style="padding:12px 16px 6px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--mp-muted)">Categorías</div>
+            <sc-for list="{{ catRows }}" as="c" hint-placeholder-count="4">
+              <div>
+                <div onClick="{{ c.toggle }}" role="button" style="display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;min-height:44px" style-hover="background:color-mix(in srgb, var(--color-text) 4%, transparent)">
+                  <span style="width:36px;height:36px;border-radius:10px;background:color-mix(in srgb, {{ c.color }} 18%, transparent);color:{{ c.color }};display:flex;align-items:center;justify-content:center;font-size:18px;flex:none"><i class="ph {{ c.icon }}"></i></span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:14px;font-weight:500">{{ c.name }}</span>
+                    <span style="display:block;font-size:11.5px;color:var(--mp-muted)">{{ c.countLabel }}</span>
+                  </span>
+                  <span style="font-size:14px;font-weight:600">{{ c.totalFmt }}</span>
+                  <i class="ph ph-caret-down" style="color:var(--mp-muted);font-size:14px;transform:{{ c.chev }};transition:transform .2s"></i>
+                </div>
+                <sc-if value="{{ c.expanded }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:2px 16px 12px 64px;display:flex;flex-direction:column;gap:8px;animation:mpFadeUp .2s ease">
+                    <sc-for list="{{ c.groups }}" as="g" hint-placeholder-count="3">
+                      <div style="display:flex;justify-content:space-between;font-size:13px">
+                        <span style="color:var(--mp-muted)">{{ g.name }}</span>
+                        <span>{{ g.fmt }}</span>
+                      </div>
+                    </sc-for>
+                    <button onClick="{{ c.openDetail }}" style="align-self:flex-start;margin-top:2px;border:none;background:transparent;color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;padding:8px 0;font-family:var(--font-body);display:flex;align-items:center;gap:5px">Ver movimientos <i class="ph ph-arrow-right"></i></button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ c.divider }}" hint-placeholder-val="{{ true }}"><div style="height:1px;background:var(--color-divider);margin:0 16px"></div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ emptyMonth }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center;padding:10px;color:var(--mp-muted);font-size:13px">Mes nuevo — registra tu primer gasto en la pestaña Agregar.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdd }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Agregar gasto" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease">
+          <div style="font-family:var(--font-heading);font-weight:500;font-size:24px;letter-spacing:-0.015em;padding-top:6px">{{ addTitle }}</div>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ modeGasto }}" style="flex:1;height:44px;border-radius:10px;border:1px solid {{ gastoTabBorder }};background:{{ gastoTabBg }};color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Gasto</button>
+            <button onClick="{{ modeAbono }}" style="flex:1;height:44px;border-radius:10px;border:1px solid {{ abonoTabBorder }};background:{{ abonoTabBg }};color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Abono a deuda</button>
+          </div>
+
+          <sc-if value="{{ isAbono }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:20px 16px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <label style="font-size:12px;color:var(--mp-muted)">Monto del abono</label>
+                <div style="display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--color-divider);padding-bottom:8px">
+                  <span style="font-size:26px;color:var(--mp-muted)">$</span>
+                  <input type="number" inputMode="decimal" placeholder="0" value="{{ abAmount }}" onChange="{{ onAbAmount }}" style="flex:1;min-width:0;font-size:30px;font-weight:600;background:transparent;border:none;color:var(--color-text);font-family:var(--font-body);letter-spacing:-0.01em">
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="font-size:12px;color:var(--mp-muted)">Deuda</label>
+                <sc-if value="{{ abNoDebts }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13px;color:var(--mp-muted);text-wrap:pretty">Todavía no tienes deudas. Créalas en la pestaña Deudas.</div>
+                </sc-if>
+                <sc-for list="{{ abDebtOptions }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.pick }}" style="min-height:48px;border-radius:10px;border:1px solid {{ o.border }};background:{{ o.bg }};color:var(--color-text);font-size:13.5px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 14px;text-align:left"><span>{{ o.name }}</span><span style="font-size:12px;font-weight:400;color:var(--mp-muted)">restan {{ o.restanFmt }}</span></button>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="font-size:12px;color:var(--mp-muted)">Pagado con</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <sc-for list="{{ abMethods }}" as="m" hint-placeholder-count="4">
+                    <button onClick="{{ m.pick }}" style="height:44px;border-radius:10px;border:1px solid {{ m.border }};background:{{ m.bg }};color:var(--color-text);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:6px"><i class="ph {{ m.icon }}" style="font-size:15px;color:{{ m.color }}"></i>{{ m.name }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <label style="font-size:12px;color:var(--mp-muted)">Fecha</label>
+                <input type="date" value="{{ abDate }}" onChange="{{ onAbDate }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+              </div>
+              <sc-if value="{{ showAbPreview }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px;color:var(--mp-muted);text-wrap:pretty">{{ abPreview }}</div>
+              </sc-if>
+              <button onClick="{{ submitAbono }}" disabled="{{ cantAbonar }}" style="height:50px;border-radius:10px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-size:15px;font-weight:500;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">Registrar abono</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isGasto }}" hint-placeholder-val="{{ true }}">
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:20px 16px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;color:var(--mp-muted)">Monto</label>
+              <div style="display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--color-divider);padding-bottom:8px">
+                <span style="font-size:26px;color:var(--mp-muted)">$</span>
+                <input type="number" inputMode="decimal" placeholder="0" value="{{ fAmount }}" onChange="{{ onAmount }}" style="flex:1;min-width:0;font-size:30px;font-weight:600;background:transparent;border:none;color:var(--color-text);font-family:var(--font-body);letter-spacing:-0.01em">
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <label style="font-size:12px;color:var(--mp-muted)">Categoría</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="4">
+                  <button onClick="{{ ch.pick }}" style="height:48px;border-radius:10px;border:1px solid {{ ch.border }};background:{{ ch.bg }};color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:7px"><i class="ph {{ ch.icon }}" style="font-size:16px;color:{{ ch.color }}"></i>{{ ch.name }}</button>
+                </sc-for>
+                <sc-if value="{{ newCatOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="grid-column:1 / -1;display:flex;flex-direction:column;gap:8px;animation:mpFadeUp .18s ease">
+                    <input type="text" placeholder="Nombre de la categoría" value="{{ newCatName }}" onChange="{{ onNewCatName }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+                    <div style="display:flex;gap:8px">
+                      <button onClick="{{ cancelNewCat }}" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+                      <button onClick="{{ saveNewCat }}" disabled="{{ cantSaveCat }}" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--color-accent);background:color-mix(in srgb, var(--color-accent) 12%, transparent);color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Crear categoría</button>
+                    </div>
+                  </div>
+                </sc-if>
+                <button onClick="{{ openNewCat }}" style="grid-column:1 / -1;height:44px;border-radius:10px;border:1px dashed var(--color-divider);background:transparent;color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:6px" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)"><i class="ph ph-plus"></i>Nueva categoría</button>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;color:var(--mp-muted)">Producto o descripción</label>
+              <input type="text" placeholder="Ej. Mercado, gasolina, cine…" value="{{ fDesc }}" onChange="{{ onDesc }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;color:var(--mp-muted)">Fecha</label>
+              <input type="date" value="{{ fDate }}" onChange="{{ onDate }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+            </div>
+            <button onClick="{{ submitExpense }}" disabled="{{ cantSubmit }}" style="height:50px;border-radius:10px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-size:15px;font-weight:500;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">Guardar gasto</button>
+          </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Detalle de categoría" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:2px">
+            <button onClick="{{ goHome }}" aria-label="Volver" style="width:44px;height:44px;border-radius:10px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:17px;cursor:pointer"><i class="ph ph-caret-left"></i></button>
+            <span style="width:36px;height:36px;border-radius:10px;background:color-mix(in srgb, {{ detailColor }} 18%, transparent);color:{{ detailColor }};display:flex;align-items:center;justify-content:center;font-size:18px"><i class="ph {{ detailIcon }}"></i></span>
+            <div>
+              <div style="font-family:var(--font-heading);font-weight:500;font-size:19px;letter-spacing:-0.015em">{{ detailName }}</div>
+              <div style="font-size:12px;color:var(--mp-muted)">{{ monthName }} · {{ detailCount }}</div>
+            </div>
+          </div>
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-size:12px;color:var(--mp-muted)">Total del mes</span>
+            <span style="font-size:22px;font-weight:600;letter-spacing:-0.01em">{{ detailTotalFmt }}</span>
+          </div>
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:4px 0">
+            <sc-for list="{{ detailRows }}" as="r" hint-placeholder-count="5">
+              <div style="border-bottom:1px solid {{ r.border }}">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 12px 11px 16px">
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:14px;font-weight:500">{{ r.desc }}</span>
+                    <span style="display:block;font-size:11.5px;color:var(--mp-muted)">{{ r.group }} · {{ r.date }}</span>
+                  </span>
+                  <span style="text-align:right">
+                    <span style="display:block;font-size:14px;font-weight:600">{{ r.amtFmt }}</span>
+                    <span style="display:block;font-size:11px;color:var(--mp-muted)">acum. {{ r.runFmt }}</span>
+                  </span>
+                  <button onClick="{{ r.askDel }}" aria-label="Eliminar movimiento" style="width:36px;height:36px;flex:none;border-radius:9px;border:none;background:transparent;color:var(--mp-muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent);color:var(--color-text)"><i class="ph ph-trash"></i></button>
+                </div>
+                <sc-if value="{{ r.confirming }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:8px;padding:0 12px 12px 16px;animation:mpFadeUp .18s ease">
+                    <span style="flex:1;font-size:12.5px;color:var(--mp-muted);text-wrap:pretty">¿Eliminar este movimiento?</span>
+                    <button onClick="{{ r.cancelDel }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+                    <button onClick="{{ r.del }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--color-accent);background:color-mix(in srgb, var(--color-accent) 12%, transparent);color:var(--color-accent);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Eliminar</button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDebts }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Deudas y metas" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease">
+          <div style="font-family:var(--font-heading);font-weight:500;font-size:24px;letter-spacing:-0.015em;padding-top:6px">Deudas y metas</div>
+          <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--mp-muted)">Deudas</div>
+          <sc-if value="{{ noDebts }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;font-size:13px;color:var(--mp-muted);text-wrap:pretty">Aún no registras deudas. Crea una y podrás abonarle desde la pestaña Agregar.</div>
+          </sc-if>
+          <sc-for list="{{ debts }}" as="d" hint-placeholder-count="2">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <span style="font-size:14px;font-weight:500;flex:1;min-width:0">{{ d.name }}</span>
+                <span style="font-size:12px;color:var(--mp-muted)">restan {{ d.remainFmt }}</span>
+                <button onClick="{{ d.askDel }}" aria-label="Eliminar deuda" style="width:32px;height:32px;flex:none;border-radius:9px;border:none;background:transparent;color:var(--mp-muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent);color:var(--color-text)"><i class="ph ph-trash"></i></button>
+              </div>
+              <div style="height:6px;border-radius:3px;background:color-mix(in srgb, var(--color-text) 10%, transparent);overflow:hidden">
+                <div style="height:100%;border-radius:3px;background:var(--color-accent);width:{{ d.pctW }};transition:width .35s ease"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mp-muted)">
+                <span>Pagado {{ d.paidFmt }}</span><span>{{ d.pct }}% de {{ d.totalFmt }}</span>
+              </div>
+              <sc-if value="{{ d.confirming }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:8px;animation:mpFadeUp .18s ease">
+                  <span style="flex:1;font-size:12.5px;color:var(--mp-muted);text-wrap:pretty">¿Eliminar esta deuda?</span>
+                  <button onClick="{{ d.cancelDel }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+                  <button onClick="{{ d.del }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--color-accent);background:color-mix(in srgb, var(--color-accent) 12%, transparent);color:var(--color-accent);font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Eliminar</button>
+                </div>
+              </sc-if>
+              <button onClick="{{ d.abonar }}" style="align-self:flex-start;border:none;background:transparent;color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;padding:6px 0;font-family:var(--font-body);display:flex;align-items:center;gap:5px"><i class="ph ph-plus-circle"></i>Abonar</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ debtFormOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;display:flex;flex-direction:column;gap:12px;animation:mpFadeUp .2s ease">
+              <div style="font-size:13px;font-weight:500">Nueva deuda</div>
+              <input type="text" placeholder="Nombre (ej. Tarjeta Banorte)" value="{{ dfName }}" onChange="{{ onDfName }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+              <input type="number" inputMode="decimal" placeholder="Total que debes" value="{{ dfTotal }}" onChange="{{ onDfTotal }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+              <input type="number" inputMode="decimal" placeholder="Ya pagado (opcional)" value="{{ dfPaid }}" onChange="{{ onDfPaid }}" style="height:46px;border-radius:10px;border:1px solid var(--color-divider);background:color-mix(in srgb, var(--color-text) 5%, transparent);color:var(--color-text);padding:0 14px;font-size:15px;font-family:var(--font-body)">
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ cancelDebtForm }}" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+                <button onClick="{{ saveDebt }}" disabled="{{ cantSaveDebt }}" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--color-accent);background:color-mix(in srgb, var(--color-accent) 12%, transparent);color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Crear deuda</button>
+              </div>
+            </div>
+          </sc-if>
+          <button onClick="{{ openDebtForm }}" style="height:46px;border-radius:10px;border:1px dashed var(--color-divider);background:transparent;color:var(--color-accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:6px" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)"><i class="ph ph-plus"></i>Nueva deuda</button>
+          <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--mp-muted);margin-top:4px">Metas de ahorro</div>
+          <sc-for list="{{ goals }}" as="g" hint-placeholder-count="2">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-size:14px;font-weight:500">{{ g.name }}</span>
+                <span style="font-size:12px;color:var(--mp-muted)">meta {{ g.targetFmt }}</span>
+              </div>
+              <div style="height:6px;border-radius:3px;background:color-mix(in srgb, var(--color-text) 10%, transparent);overflow:hidden">
+                <div style="height:100%;border-radius:3px;background:var(--mp-c2);width:{{ g.pctW }}"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mp-muted)">
+                <span>Ahorrado {{ g.savedFmt }}</span><span>{{ g.pct }}%</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAi }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="AI Insights" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease;flex:1">
+          <div style="padding-top:6px">
+            <div style="font-family:var(--font-heading);font-weight:500;font-size:24px;letter-spacing:-0.015em">Asistente</div>
+            <div style="font-size:12.5px;color:var(--mp-muted)">Consejos generados con tus datos de {{ monthNameLower }}</div>
+          </div>
+          <sc-for list="{{ insights }}" as="n" hint-placeholder-count="4">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+              <span style="width:32px;height:32px;border-radius:9px;background:color-mix(in srgb, {{ n.color }} 18%, transparent);color:{{ n.color }};display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;margin-top:2px"><i class="ph {{ n.icon }}"></i></span>
+              <span>
+                <span style="display:block;font-size:14px;font-weight:600">{{ n.title }}</span>
+                <span style="display:block;font-size:13px;color:var(--mp-muted);margin-top:2px;text-wrap:pretty">{{ n.body }}</span>
+              </span>
+            </div>
+          </sc-for>
+          <div style="flex:1"></div>
+          <sc-for list="{{ chatMsgs }}" as="m" hint-placeholder-count="1">
+            <div style="display:flex;justify-content:{{ m.justify }}">
+              <div style="max-width:78%;padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.45;background:{{ m.bg }};color:var(--color-text);text-wrap:pretty">{{ m.text }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--mp-muted);padding-left:4px">Escribiendo…</div>
+          </sc-if>
+          <div style="display:flex;gap:8px;position:sticky;bottom:0;background:var(--color-bg);padding-top:4px">
+            <input type="text" placeholder="¿Cómo puedo ahorrar más este mes?" value="{{ chatDraft }}" onChange="{{ onChatDraft }}" onKeyDown="{{ onChatKey }}" style="flex:1;min-width:0;height:46px;border-radius:12px;border:1px solid var(--color-divider);background:var(--color-surface);color:var(--color-text);padding:0 14px;font-size:14px;font-family:var(--font-body)">
+            <button onClick="{{ sendChat }}" aria-label="Enviar" style="width:46px;height:46px;border-radius:12px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-size:18px;cursor:pointer" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)"><i class="ph ph-paper-plane-tilt"></i></button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Historial" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease">
+          <div style="padding-top:6px">
+            <div style="font-family:var(--font-heading);font-weight:500;font-size:24px;letter-spacing:-0.015em">Historial</div>
+            <div style="font-size:12.5px;color:var(--mp-muted)">Meses cerrados</div>
+          </div>
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:4px 0">
+            <sc-for list="{{ historyRows }}" as="h" hint-placeholder-count="3">
+              <div onClick="{{ h.open }}" role="button" style="display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border-bottom:1px solid {{ h.border }};min-height:44px" style-hover="background:color-mix(in srgb, var(--color-text) 4%, transparent)">
+                <span style="width:36px;height:36px;border-radius:10px;background:color-mix(in srgb, var(--color-text) 7%, transparent);color:var(--mp-muted);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none"><i class="ph ph-calendar-blank"></i></span>
+                <span style="flex:1">
+                  <span style="display:block;font-size:14px;font-weight:500">{{ h.name }}</span>
+                  <span style="display:block;font-size:11.5px;color:var(--mp-muted)">Gastos {{ h.expenseFmt }}</span>
+                </span>
+                <span style="font-size:13px;font-weight:600;color:var(--color-accent)">{{ h.balanceFmt }}</span>
+                <i class="ph ph-caret-right" style="color:var(--mp-muted);font-size:14px"></i>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isArchive }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Mes archivado" style="display:flex;flex-direction:column;gap:14px;animation:mpFadeUp .25s ease">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:2px">
+            <button onClick="{{ goHistory }}" aria-label="Volver" style="width:44px;height:44px;border-radius:10px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:17px;cursor:pointer"><i class="ph ph-caret-left"></i></button>
+            <div style="flex:1">
+              <div style="font-family:var(--font-heading);font-weight:500;font-size:19px;letter-spacing:-0.015em">{{ archName }}</div>
+            </div>
+            <span style="font-size:11px;padding:5px 9px;border-radius:6px;background:color-mix(in srgb, var(--color-text) 8%, transparent);color:var(--mp-muted);display:flex;align-items:center;gap:5px"><i class="ph ph-lock-simple"></i>Solo lectura</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:12px">
+              <div style="font-size:11px;color:var(--mp-muted)">Ingresos</div>
+              <div style="font-size:16px;font-weight:600;margin-top:2px">{{ archIncomeFmt }}</div>
+            </div>
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:12px">
+              <div style="font-size:11px;color:var(--mp-muted)">Gastos</div>
+              <div style="font-size:16px;font-weight:600;margin-top:2px">{{ archExpenseFmt }}</div>
+            </div>
+            <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:12px">
+              <div style="font-size:11px;color:var(--mp-muted)">Balance</div>
+              <div style="font-size:16px;font-weight:600;margin-top:2px;color:var(--color-accent)">{{ archBalanceFmt }}</div>
+            </div>
+          </div>
+          <div style="background:var(--color-surface);border-radius:14px;box-shadow:var(--shadow-sm);padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--mp-muted)">Gasto por categoría</div>
+            <sc-for list="{{ archCats }}" as="c" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;justify-content:space-between;font-size:13px">
+                  <span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:3px;background:{{ c.color }}"></span>{{ c.name }}</span>
+                  <span style="font-weight:500">{{ c.fmt }}</span>
+                </div>
+                <div style="height:5px;border-radius:3px;background:color-mix(in srgb, var(--color-text) 8%, transparent);overflow:hidden">
+                  <div style="height:100%;border-radius:3px;background:{{ c.color }};width:{{ c.pctW }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <div style="display:flex;border-top:1px solid var(--color-divider);background:var(--color-surface);padding:6px 8px 26px;flex:none">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.go }}" style="flex:1;height:50px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:{{ t.color }};font-family:var(--font-body)">
+          <i class="ph {{ t.icon }}" style="font-size:21px"></i>
+          <span style="font-size:10px;font-weight:{{ t.weight }}">{{ t.label }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ confirmClose }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(10,11,20,0.55);z-index:80;display:flex;align-items:center;justify-content:center;padding:28px" onClick="{{ cancelClose }}">
+        <div style="background:var(--color-surface);border-radius:16px;box-shadow:var(--shadow-lg);padding:20px;width:100%;animation:mpFadeUp .2s ease" onClick="{{ stopProp }}">
+          <div style="font-family:var(--font-heading);font-weight:500;font-size:18px;margin-bottom:6px">¿Cerrar {{ monthNameLower }}?</div>
+          <div style="font-size:13.5px;color:var(--mp-muted);text-wrap:pretty">El mes se archivará en el historial como solo lectura y empezarás {{ nextMonthLower }} en ceros.</div>
+          <div style="display:flex;gap:8px;margin-top:18px">
+            <button onClick="{{ cancelClose }}" style="flex:1;height:46px;border-radius:10px;border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+            <button onClick="{{ doClose }}" style="flex:1;height:46px;border-radius:10px;border:1px solid var(--color-accent);background:color-mix(in srgb, var(--color-accent) 12%, transparent);color:var(--color-accent);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-body)">Cerrar mes</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:480,&quot;height&quot;:960},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;,&quot;section&quot;:&quot;Apariencia&quot;},&quot;monthlyIncome&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2500000,&quot;min&quot;:10000,&quot;max&quot;:200000,&quot;step&quot;:1000,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Datos&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: null, screen: 'home', expandedCat: null, detailCat: 'tarjeta', archIdx: 0,
+    monthName: 'Julio 2026', confirmClose: false, pendingDel: null, typing: false, chatDraft: '',
+    addMode: 'gasto',
+    form: { amount: '', cat: 'tarjeta', desc: '', date: '2026-07-31' },
+    newCat: { open: false, name: '' },
+    abono: { debt: 0, amount: '', date: '2026-07-31', cat: 'transferencia' },
+    debtForm: { open: false, name: '', total: '', paid: '' },
+    pendingDebtDel: null,
+    cats: [
+      { id: 'tarjeta', name: 'Tarjeta de crédito', icon: 'ph-credit-card', color: 'var(--mp-c1)' },
+      { id: 'efectivo', name: 'Efectivo', icon: 'ph-money', color: 'var(--mp-c2)' },
+      { id: 'transferencia', name: 'Transferencia', icon: 'ph-arrows-left-right', color: 'var(--mp-c3)' },
+      { id: 'otros', name: 'Otros', icon: 'ph-dots-three-circle', color: 'var(--mp-c4)' }
+    ],
+    chat: [{ me: false, text: 'Hola, soy tu asistente. Pregúntame lo que quieras sobre tus finanzas de este mes.' }],
+    tx: [
+      { cat: 'tarjeta', g: 'Suscripciones', d: 'Netflix', a: 219, dt: '1 jul' },
+      { cat: 'tarjeta', g: 'Suscripciones', d: 'Spotify', a: 129, dt: '1 jul' },
+      { cat: 'transferencia', g: 'Renta', d: 'Depto Roma Norte', a: 8500, dt: '1 jul' },
+      { cat: 'tarjeta', g: 'Mercado', d: 'Soriana', a: 1240, dt: '3 jul' },
+      { cat: 'tarjeta', g: 'Restaurantes', d: 'Tacos El Güero', a: 380, dt: '6 jul' },
+      { cat: 'efectivo', g: 'Mercado', d: 'Tianguis', a: 450, dt: '7 jul' },
+      { cat: 'otros', g: 'Salud', d: 'Farmacia Guadalajara', a: 260, dt: '9 jul' },
+      { cat: 'transferencia', g: 'Servicios', d: 'CFE luz', a: 480, dt: '10 jul' },
+      { cat: 'transferencia', g: 'Servicios', d: 'Internet Telmex', a: 599, dt: '10 jul' },
+      { cat: 'tarjeta', g: 'Mercado', d: 'Costco', a: 2180, dt: '12 jul' },
+      { cat: 'tarjeta', g: 'Gasolina', d: 'Pemex Insurgentes', a: 950, dt: '15 jul' },
+      { cat: 'tarjeta', g: 'Restaurantes', d: 'Sushi Roll', a: 620, dt: '19 jul' },
+      { cat: 'efectivo', g: 'Transporte', d: 'Metro y taxis', a: 300, dt: '21 jul' },
+      { cat: 'efectivo', g: 'Propinas', d: 'Varios', a: 120, dt: '24 jul' },
+      { cat: 'otros', g: 'Regalos', d: 'Cumpleaños de Ana', a: 500, dt: '26 jul' }
+    ],
+    debts: [
+      { name: 'Tarjeta Banorte', total: 18000, paid: 6500 },
+      { name: 'Préstamo del auto', total: 120000, paid: 78000 }
+    ],
+    goals: [
+      { name: 'Fondo de emergencia', target: 50000, saved: 32500 },
+      { name: 'Vacaciones en diciembre', target: 20000, saved: 7800 }
+    ],
+    history: [
+      { name: 'Junio 2026', income: 45000, expense: 19240, cats: { tarjeta: 6420, efectivo: 1150, transferencia: 9890, otros: 1780 } },
+      { name: 'Mayo 2026', income: 44000, expense: 21105, cats: { tarjeta: 7315, efectivo: 940, transferencia: 10970, otros: 1880 } },
+      { name: 'Abril 2026', income: 45000, expense: 17830, cats: { tarjeta: 5210, efectivo: 760, transferencia: 9860, otros: 2000 } }
+    ]
+  };
+
+  EXTRA_COLORS = ['#796cbf', '#d2cefd', '#595d6c', '#e7e5fe', '#423a6a', '#b2b6ca'];
+
+  get CATS() { return this.state.cats; }
+
+  fmt(n) { return '$' + Math.round(n).toLocaleString('es-MX'); }
+
+  slug(s) { return s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).slice(2, 6); }
+
+  toDt(iso) {
+    const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const p = String(iso).split('-');
+    return p.length === 3 ? parseInt(p[2]) + ' ' + MES[parseInt(p[1]) - 1] : String(iso);
+  }
+
+  reply(q) {
+    const s = this.state, t = q.toLowerCase();
+    const totals = {}; s.tx.forEach(x => totals[x.cat] = (totals[x.cat] || 0) + x.a);
+    const spent = s.tx.reduce((a, x) => a + x.a, 0);
+    const income = this.props.monthlyIncome ?? 45000;
+    if (t.includes('ahorr')) return 'Tu balance actual es ' + this.fmt(income - spent) + '. Si apartas el 20% de tus ingresos (' + this.fmt(income * 0.2) + ') completarías tu fondo de emergencia en unos 3 meses.';
+    if (t.includes('deud')) return 'A tu ritmo actual de pago (~$1,500 al mes), liquidarías la tarjeta Banorte en unos 8 meses. Subir el pago a $2,300 lo reduce a 5.';
+    if (t.includes('suscrip')) return 'Tus suscripciones suman $348 al mes ($4,176 al año). Revisa si usas ambas; cancelar una libera ahorro directo.';
+    if (t.includes('gast') || t.includes('categor')) return 'Tu mayor gasto este mes es transferencia (' + this.fmt(totals.transferencia || 0) + '), seguido de tarjeta de crédito (' + this.fmt(totals.tarjeta || 0) + '). La renta es el rubro más grande.';
+    return 'Este mes llevas ' + this.fmt(spent) + ' gastados de ' + this.fmt(income) + ' de ingresos. Pregúntame por ahorro, deudas, suscripciones o gastos.';
+  }
+
+  renderVals() {
+    const s = this.state, p = this.props;
+    const themeName = s.theme ?? p.theme ?? 'dark';
+    const isDark = themeName === 'dark';
+    const income = p.monthlyIncome ?? 45000;
+    const spent = s.tx.reduce((a, x) => a + x.a, 0);
+    const totals = {}; s.tx.forEach(x => totals[x.cat] = (totals[x.cat] || 0) + x.a);
+    const go = sc => () => this.setState({ screen: sc, pendingDel: null, pendingDebtDel: null });
+
+    // donut
+    let donutGradient = 'conic-gradient(color-mix(in srgb, var(--color-text) 10%, transparent) 0 100%)';
+    if (spent > 0) {
+      let acc = 0; const stops = this.CATS.map(c => {
+        const from = acc / spent * 100; acc += (totals[c.id] || 0);
+        return c.color + ' ' + from.toFixed(2) + '% ' + (acc / spent * 100).toFixed(2) + '%';
+      });
+      donutGradient = 'conic-gradient(' + stops.join(', ') + ')';
+    }
+
+    const catRows = this.CATS.map((c, i) => {
+      const list = s.tx.filter(x => x.cat === c.id);
+      const groups = {}; list.forEach(x => groups[x.g] = (groups[x.g] || 0) + x.a);
+      const total = totals[c.id] || 0;
+      const expanded = s.expandedCat === c.id;
+      return {
+        ...c, totalFmt: this.fmt(total),
+        pct: spent ? Math.round(total / spent * 100) : 0,
+        countLabel: list.length === 1 ? '1 movimiento' : list.length + ' movimientos',
+        expanded, chev: expanded ? 'rotate(180deg)' : 'none',
+        divider: i < this.CATS.length - 1,
+        groups: Object.entries(groups).map(([name, v]) => ({ name, fmt: this.fmt(v) })),
+        toggle: () => this.setState({ expandedCat: expanded ? null : c.id }),
+        openDetail: () => this.setState({ detailCat: c.id, screen: 'detail' })
+      };
+    });
+
+    const dCat = this.CATS.find(c => c.id === s.detailCat) || this.CATS[0];
+    let run = 0;
+    const dList = s.tx.map((x, ix) => ({ ...x, ix })).filter(x => x.cat === dCat.id);
+    const detailRows = dList.map((x, i) => {
+      run += x.a;
+      return {
+        desc: x.d, group: x.g, date: x.dt, amtFmt: this.fmt(x.a), runFmt: this.fmt(run),
+        border: i < dList.length - 1 ? 'var(--color-divider)' : 'transparent',
+        confirming: s.pendingDel === x.ix,
+        askDel: () => this.setState({ pendingDel: x.ix }),
+        cancelDel: () => this.setState({ pendingDel: null }),
+        del: () => this.setState(st => ({ tx: st.tx.filter((_, ix2) => ix2 !== x.ix), pendingDel: null }))
+      };
+    });
+
+    const arch = s.history[s.archIdx] || s.history[0];
+    const archMax = arch ? Math.max(...Object.values(arch.cats)) : 1;
+
+    const f = s.form;
+    const setForm = patch => this.setState(st => ({ form: { ...st.form, ...patch } }));
+    const setDebtForm = patch => this.setState(st => ({ debtForm: { ...st.debtForm, ...patch } }));
+    const setAbono = patch => this.setState(st => ({ abono: { ...st.abono, ...patch } }));
+    const canSubmit = parseFloat(f.amount) > 0 && f.desc.trim();
+    const ab = s.abono;
+    const abDebt = s.debts[ab.debt];
+    const canAbonar = !!abDebt && parseFloat(ab.amount) > 0;
+
+    const insights = [
+      { icon: 'ph-warning-circle', color: 'var(--mp-c1)', title: 'La renta domina tus transferencias', body: 'La renta es ' + (spent ? Math.round(8500 / spent * 100) : 0) + '% de tu gasto total del mes; el resto de tus categorías está dentro de lo normal.' },
+      { icon: 'ph-trend-down', color: 'var(--mp-c3)', title: 'Proyección de deuda', body: 'Al ritmo actual liquidarías la tarjeta Banorte en unos 8 meses. Un pago extra de $800 al mes lo baja a 5.' },
+      { icon: 'ph-piggy-bank', color: 'var(--mp-c2)', title: 'Vas adelantado con tu fondo', body: 'Llevas 65% del fondo de emergencia. Apartar ' + this.fmt(income * 0.1) + ' este mes te deja a 2 meses de completarlo.' },
+      { icon: 'ph-repeat', color: 'var(--mp-c4)', title: 'Suscripciones estables', body: 'Netflix y Spotify suman $348 al mes ($4,176 al año). Vale la pena revisarlas una vez por trimestre.' }
+    ];
+
+    const tabsDef = [
+      { id: 'home', label: 'Inicio', icon: 'ph-house' },
+      { id: 'add', label: 'Agregar', icon: 'ph-plus-circle' },
+      { id: 'debts', label: 'Deudas', icon: 'ph-hand-coins' },
+      { id: 'ai', label: 'Asistente', icon: 'ph-sparkle' },
+      { id: 'history', label: 'Historial', icon: 'ph-clock-counter-clockwise' }
+    ];
+    const baseTab = { detail: 'home', archive: 'history' }[s.screen] || s.screen;
+
+    const nextMonth = { Julio: 'agosto', Agosto: 'septiembre', Septiembre: 'octubre' }[s.monthName.split(' ')[0]] || 'el siguiente mes';
+
+    return {
+      themeName, isDark, themeIcon: isDark ? 'ph-sun' : 'ph-moon',
+      toggleTheme: () => this.setState({ theme: isDark ? 'light' : 'dark' }),
+      monthName: s.monthName, monthNameLower: s.monthName.toLowerCase(), nextMonthLower: nextMonth,
+      incomeFmt: this.fmt(income), expenseFmt: this.fmt(spent), balanceFmt: this.fmt(income - spent),
+      donutGradient, catRows, emptyMonth: s.tx.length === 0,
+      isHome: s.screen === 'home', isAdd: s.screen === 'add', isDetail: s.screen === 'detail',
+      isDebts: s.screen === 'debts', isAi: s.screen === 'ai', isHistory: s.screen === 'history', isArchive: s.screen === 'archive',
+      goHome: go('home'), goHistory: go('history'),
+      tabs: tabsDef.map(t => ({
+        ...t, go: go(t.id),
+        color: baseTab === t.id ? 'var(--color-accent)' : 'var(--mp-muted)',
+        weight: baseTab === t.id ? 600 : 400
+      })),
+      detailName: dCat.name, detailIcon: dCat.icon, detailColor: dCat.color,
+      detailCount: dList.length === 1 ? '1 movimiento' : dList.length + ' movimientos',
+      detailTotalFmt: this.fmt(totals[dCat.id] || 0), detailRows,
+      debts: s.debts.map((d, i) => {
+        const pct = Math.min(100, Math.round(d.paid / d.total * 100));
+        return {
+          name: d.name, pct, pctW: pct + '%', totalFmt: this.fmt(d.total), paidFmt: this.fmt(d.paid),
+          remainFmt: this.fmt(Math.max(0, d.total - d.paid)),
+          done: d.paid >= d.total,
+          confirming: s.pendingDebtDel === i,
+          askDel: () => this.setState({ pendingDebtDel: i }),
+          cancelDel: () => this.setState({ pendingDebtDel: null }),
+          del: () => this.setState(st => ({
+            debts: st.debts.filter((_, j) => j !== i), pendingDebtDel: null,
+            abono: { ...st.abono, debt: 0 }
+          })),
+          abonar: () => this.setState(st => ({ screen: 'add', addMode: 'abono', abono: { ...st.abono, debt: i } }))
+        };
+      }),
+      noDebts: s.debts.length === 0,
+      debtFormOpen: s.debtForm.open,
+      dfName: s.debtForm.name, dfTotal: s.debtForm.total, dfPaid: s.debtForm.paid,
+      onDfName: e => setDebtForm({ name: e.target.value }),
+      onDfTotal: e => setDebtForm({ total: e.target.value }),
+      onDfPaid: e => setDebtForm({ paid: e.target.value }),
+      openDebtForm: () => setDebtForm({ open: true }),
+      cancelDebtForm: () => this.setState({ debtForm: { open: false, name: '', total: '', paid: '' } }),
+      cantSaveDebt: !(s.debtForm.name.trim() && parseFloat(s.debtForm.total) > 0),
+      saveDebt: () => {
+        const df = this.state.debtForm;
+        if (!(df.name.trim() && parseFloat(df.total) > 0)) return;
+        this.setState(st => ({
+          debts: [...st.debts, { name: df.name.trim(), total: parseFloat(df.total), paid: parseFloat(df.paid) || 0 }],
+          debtForm: { open: false, name: '', total: '', paid: '' }
+        }));
+      },
+      goals: s.goals.map(g => {
+        const pct = Math.round(g.saved / g.target * 100);
+        return { name: g.name, pct, pctW: pct + '%', targetFmt: this.fmt(g.target), savedFmt: this.fmt(g.saved) };
+      }),
+      historyRows: s.history.map((h, i) => ({
+        name: h.name, expenseFmt: this.fmt(h.expense), balanceFmt: '+' + this.fmt(h.income - h.expense),
+        border: i < s.history.length - 1 ? 'var(--color-divider)' : 'transparent',
+        open: () => this.setState({ archIdx: i, screen: 'archive' })
+      })),
+      archName: arch ? arch.name : '', archIncomeFmt: arch ? this.fmt(arch.income) : '',
+      archExpenseFmt: arch ? this.fmt(arch.expense) : '', archBalanceFmt: arch ? this.fmt(arch.income - arch.expense) : '',
+      archCats: arch ? this.CATS.map(c => ({
+        name: c.name, color: c.color, fmt: this.fmt(arch.cats[c.id] || 0),
+        pctW: Math.round((arch.cats[c.id] || 0) / archMax * 100) + '%'
+      })) : [],
+      fAmount: f.amount, fDesc: f.desc, fDate: f.date,
+      onAmount: e => setForm({ amount: e.target.value }),
+      onDesc: e => setForm({ desc: e.target.value }),
+      onDate: e => setForm({ date: e.target.value }),
+      chips: this.CATS.map(c => ({
+        id: c.id, name: c.name, icon: c.icon, color: c.color,
+        border: f.cat === c.id ? 'var(--color-accent)' : 'var(--color-divider)',
+        bg: f.cat === c.id ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'transparent',
+        pick: () => setForm({ cat: c.id })
+      })),
+      cantSubmit: !canSubmit,
+      submitExpense: () => {
+        if (!canSubmit) return;
+        this.setState(st => ({
+          tx: [...st.tx, { cat: f.cat, g: f.desc.trim(), d: f.desc.trim(), a: parseFloat(f.amount), dt: this.toDt(f.date) }],
+          form: { amount: '', cat: st.cats[0].id, desc: '', date: st.form.date },
+          screen: 'home', expandedCat: f.cat
+        }));
+      },
+      addMode: s.addMode, isGasto: s.addMode === 'gasto', isAbono: s.addMode === 'abono',
+      modeGasto: () => this.setState({ addMode: 'gasto' }),
+      modeAbono: () => this.setState({ addMode: 'abono' }),
+      gastoTabBorder: s.addMode === 'gasto' ? 'var(--color-accent)' : 'var(--color-divider)',
+      gastoTabBg: s.addMode === 'gasto' ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'transparent',
+      abonoTabBorder: s.addMode === 'abono' ? 'var(--color-accent)' : 'var(--color-divider)',
+      abonoTabBg: s.addMode === 'abono' ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'transparent',
+      addTitle: s.addMode === 'gasto' ? 'Agregar gasto' : 'Abonar a deuda',
+      newCatOpen: s.newCat.open, newCatName: s.newCat.name,
+      openNewCat: () => this.setState({ newCat: { open: true, name: '' } }),
+      cancelNewCat: () => this.setState({ newCat: { open: false, name: '' } }),
+      onNewCatName: e => this.setState(st => ({ newCat: { ...st.newCat, name: e.target.value } })),
+      cantSaveCat: !s.newCat.name.trim(),
+      saveNewCat: () => {
+        const name = this.state.newCat.name.trim();
+        if (!name) return;
+        const id = this.slug(name);
+        this.setState(st => ({
+          cats: [...st.cats, { id, name, icon: 'ph-tag', color: this.EXTRA_COLORS[(st.cats.length - 4) % this.EXTRA_COLORS.length] }],
+          newCat: { open: false, name: '' },
+          form: { ...st.form, cat: id }
+        }));
+      },
+      abDebtOptions: s.debts.map((d, i) => ({
+        name: d.name, restanFmt: this.fmt(Math.max(0, d.total - d.paid)),
+        border: ab.debt === i ? 'var(--color-accent)' : 'var(--color-divider)',
+        bg: ab.debt === i ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'transparent',
+        pick: () => setAbono({ debt: i })
+      })),
+      abNoDebts: s.debts.length === 0,
+      abAmount: ab.amount, abDate: ab.date,
+      onAbAmount: e => setAbono({ amount: e.target.value }),
+      onAbDate: e => setAbono({ date: e.target.value }),
+      abMethods: this.CATS.map(c => ({
+        name: c.name, icon: c.icon, color: c.color,
+        border: ab.cat === c.id ? 'var(--color-accent)' : 'var(--color-divider)',
+        bg: ab.cat === c.id ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'transparent',
+        pick: () => setAbono({ cat: c.id })
+      })),
+      abPreview: canAbonar
+        ? 'Después de este abono habrás pagado ' + this.fmt(Math.min(abDebt.total, abDebt.paid + parseFloat(ab.amount))) + ' de ' + this.fmt(abDebt.total) + ' (' + Math.min(100, Math.round((abDebt.paid + parseFloat(ab.amount)) / abDebt.total * 100)) + '%).'
+        : '',
+      showAbPreview: !!canAbonar,
+      cantAbonar: !canAbonar,
+      submitAbono: () => {
+        if (!canAbonar) return;
+        const amt = parseFloat(ab.amount);
+        this.setState(st => ({
+          debts: st.debts.map((d, i) => i === ab.debt ? { ...d, paid: Math.min(d.total, d.paid + amt) } : d),
+          tx: [...st.tx, { cat: ab.cat, g: 'Pago de deuda', d: 'Abono a ' + abDebt.name, a: amt, dt: this.toDt(ab.date) }],
+          abono: { ...st.abono, amount: '' },
+          screen: 'debts'
+        }));
+      },
+      insights,
+      chatMsgs: s.chat.map(m => ({
+        text: m.text, justify: m.me ? 'flex-end' : 'flex-start',
+        bg: m.me ? 'color-mix(in srgb, var(--color-accent) 20%, transparent)' : 'var(--color-surface)'
+      })),
+      typing: s.typing, chatDraft: s.chatDraft,
+      onChatDraft: e => this.setState({ chatDraft: e.target.value }),
+      onChatKey: e => { if (e.key === 'Enter') this.doSend(); },
+      sendChat: () => this.doSend(),
+      confirmClose: s.confirmClose,
+      askClose: () => this.setState({ confirmClose: true }),
+      cancelClose: () => this.setState({ confirmClose: false }),
+      stopProp: e => e.stopPropagation(),
+      doClose: () => this.setState(st => {
+        const inc = p.monthlyIncome ?? 45000;
+        const sp = st.tx.reduce((a, x) => a + x.a, 0);
+        const cats = {}; st.tx.forEach(x => cats[x.cat] = (cats[x.cat] || 0) + x.a);
+        this.CATS.forEach(c => cats[c.id] = cats[c.id] || 0);
+        const next = { Julio: 'Agosto', Agosto: 'Septiembre', Septiembre: 'Octubre', Octubre: 'Noviembre' }[st.monthName.split(' ')[0]] || 'Nuevo mes';
+        return {
+          history: [{ name: st.monthName, income: inc, expense: sp, cats }, ...st.history],
+          tx: [], monthName: next + ' 2026', confirmClose: false, expandedCat: null
+        };
+      })
+    };
+  }
+
+  doSend() {
+    const q = this.state.chatDraft.trim();
+    if (!q) return;
+    this.setState(st => ({ chat: [...st.chat, { me: true, text: q }], chatDraft: '', typing: true }));
+    setTimeout(() => {
+      this.setState(st => ({ chat: [...st.chat, { me: false, text: this.reply(q) }], typing: false }));
+    }, 800);
+  }
+}
+</script>
+</body>
+</html>
