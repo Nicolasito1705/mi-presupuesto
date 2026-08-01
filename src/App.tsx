@@ -21,10 +21,20 @@ import ArchiveScreen from './screens/ArchiveScreen';
 
 const THEME_KEY = 'mp.theme';
 
+/**
+ * True on the phone itself, where the drawn bezel is dropped. Kept identical to
+ * the `.mp-stage` media query in app.css — if one changes, change both.
+ */
+const PHONE = '(max-width: 480px)';
+
 function useNarrowViewport() {
-  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 480px)').matches);
+  const [narrow, setNarrow] = useState(() => window.matchMedia(PHONE).matches);
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 480px)');
+    const mq = window.matchMedia(PHONE);
+    // Re-read on mount: the viewport can change between the first render and
+    // this effect (rotating during load), and that change fires no event we'd
+    // still be around to hear.
+    setNarrow(mq.matches);
     const on = (e: MediaQueryListEvent) => setNarrow(e.matches);
     mq.addEventListener('change', on);
     return () => mq.removeEventListener('change', on);

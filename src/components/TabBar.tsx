@@ -17,7 +17,12 @@ export default function TabBar({ screen, onGo }: { screen: Screen; onGo: (s: Scr
     <div
       style={{
         display: 'flex', borderTop: '1px solid var(--color-divider)',
-        background: 'var(--color-surface)', padding: '6px 8px 26px', flex: 'none',
+        background: 'var(--color-surface)', flex: 'none',
+        // The design's 26px was measured against the prototype's drawn frame.
+        // On a real iPhone the home indicator claims 34px, so the labels ended
+        // up underneath it — take whichever is larger.
+        padding: '6px 8px',
+        paddingBottom: 'max(26px, env(safe-area-inset-bottom))',
       }}
     >
       {TABS.map((t) => (

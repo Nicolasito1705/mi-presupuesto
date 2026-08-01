@@ -58,8 +58,10 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 input[type="number"] { -moz-appearance: textfield; }
 
 /* The prototype always sits inside a 402×874 iPhone frame. That is right on a
-   desktop, but on an actual phone the frame would be a box inside a box — so
-   below 480px the frame drops away and the screen goes full-bleed. */
+   desktop, where the frame reads as presentation — but on the phone itself it
+   would be a box inside a box, so below 480px the frame drops away and the
+   screen goes full-bleed. 480px clears every iPhone in portrait; the widest,
+   the Pro Max, is 430px. */
 .mp-stage {
   min-height: 100vh;
   min-height: 100dvh;
