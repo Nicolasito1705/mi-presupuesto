@@ -38,7 +38,13 @@ export function useBudget(userId: string | null) {
   }, []);
 
   const loadOnce = useCallback(async () => {
-    const [cats, txs, dbt, gls, cls, ams] = await Promise.all([
+    // Must run BEFORE the reads, not alongside them: when the active month is
+    // past its grace period this performs the close, and reads issued in
+    // parallel would race it and return the pre-close state.
+    const ams = await supabase.rpc('sync_active_month');
+    if (ams.error) return ams.error;
+
+    const [cats, txs, dbt, gls, cls] = await Promise.all([
       supabase.from('categories').select('*').order('position').order('created_at'),
       supabase
         .from('transactions')
@@ -49,11 +55,9 @@ export function useBudget(userId: string | null) {
       supabase.from('debts').select('*').order('created_at'),
       supabase.from('goals').select('*').order('created_at'),
       supabase.from('monthly_closes').select('*').order('period_start', { ascending: false }),
-      supabase.rpc('active_month_start'),
     ]);
 
-    const firstError =
-      cats.error || txs.error || dbt.error || gls.error || cls.error || ams.error;
+    const firstError = cats.error || txs.error || dbt.error || gls.error || cls.error;
     if (firstError) return firstError;
     if (!alive.current) return null;
 

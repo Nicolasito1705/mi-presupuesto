@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fmt } from '../lib/format';
+import { fmt, groupDigits, parseAmount } from '../lib/format';
 import type { Debt, Goal } from '../types';
 import {
   cancelBtn, card, confirmBtn, dashedBtn, field, kicker, linkBtn, progressTrack,
@@ -34,13 +34,13 @@ export default function DebtsScreen({
   const [gTarget, setGTarget] = useState('');
   const [gSaved, setGSaved] = useState('');
 
-  const canSaveDebt = dName.trim().length > 0 && parseFloat(dTotal) > 0;
-  const canSaveGoal = gName.trim().length > 0 && parseFloat(gTarget) > 0;
+  const canSaveDebt = dName.trim().length > 0 && parseAmount(dTotal) > 0;
+  const canSaveGoal = gName.trim().length > 0 && parseAmount(gTarget) > 0;
 
   async function saveDebt() {
     if (!canSaveDebt || busy) return;
     const ok = await onCreateDebt({
-      name: dName, total: parseFloat(dTotal), paid: parseFloat(dPaid) || 0,
+      name: dName, total: parseAmount(dTotal), paid: parseAmount(dPaid),
     });
     if (ok) { setDebtOpen(false); setDName(''); setDTotal(''); setDPaid(''); }
   }
@@ -48,7 +48,7 @@ export default function DebtsScreen({
   async function saveGoal() {
     if (!canSaveGoal || busy) return;
     const ok = await onCreateGoal({
-      name: gName, target: parseFloat(gTarget), saved: parseFloat(gSaved) || 0,
+      name: gName, target: parseAmount(gTarget), saved: parseAmount(gSaved),
     });
     if (ok) { setGoalOpen(false); setGName(''); setGTarget(''); setGSaved(''); }
   }
@@ -135,12 +135,12 @@ export default function DebtsScreen({
             value={dName} onChange={(e) => setDName(e.target.value)} style={field}
           />
           <input
-            type="number" inputMode="decimal" placeholder="Total que debes"
-            value={dTotal} onChange={(e) => setDTotal(e.target.value)} style={field}
+            type="text" inputMode="numeric" placeholder="Total que debes"
+            value={dTotal} onChange={(e) => setDTotal(groupDigits(e.target.value))} style={field}
           />
           <input
-            type="number" inputMode="decimal" placeholder="Ya pagado (opcional)"
-            value={dPaid} onChange={(e) => setDPaid(e.target.value)} style={field}
+            type="text" inputMode="numeric" placeholder="Ya pagado (opcional)"
+            value={dPaid} onChange={(e) => setDPaid(groupDigits(e.target.value))} style={field}
           />
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setDebtOpen(false)} style={cancelBtn}>Cancelar</button>
@@ -225,12 +225,12 @@ export default function DebtsScreen({
             value={gName} onChange={(e) => setGName(e.target.value)} style={field}
           />
           <input
-            type="number" inputMode="decimal" placeholder="Monto objetivo"
-            value={gTarget} onChange={(e) => setGTarget(e.target.value)} style={field}
+            type="text" inputMode="numeric" placeholder="Monto objetivo"
+            value={gTarget} onChange={(e) => setGTarget(groupDigits(e.target.value))} style={field}
           />
           <input
-            type="number" inputMode="decimal" placeholder="Ya ahorrado (opcional)"
-            value={gSaved} onChange={(e) => setGSaved(e.target.value)} style={field}
+            type="text" inputMode="numeric" placeholder="Ya ahorrado (opcional)"
+            value={gSaved} onChange={(e) => setGSaved(groupDigits(e.target.value))} style={field}
           />
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setGoalOpen(false)} style={cancelBtn}>Cancelar</button>

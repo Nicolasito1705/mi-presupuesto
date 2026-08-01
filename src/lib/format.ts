@@ -5,9 +5,25 @@ const MONTHS_LONG = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
-/** '$1,240' — the prototype's exact money format. */
+/** Pesos colombianos: '$1.240.000' — punto para los miles, sin decimales. */
 export function fmt(n: number): string {
-  return '$' + Math.round(n || 0).toLocaleString('es-MX');
+  return '$' + Math.round(n || 0).toLocaleString('es-CO');
+}
+
+/**
+ * Los campos de monto muestran los miles separados mientras se escribe, pero
+ * lo que se envía a la base es un número limpio. Estas dos funciones son el
+ * puente: `groupDigits` para pintar, `parseAmount` para leer.
+ */
+export function groupDigits(raw: string): string {
+  const digits = raw.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  if (!digits) return '';
+  return Number(digits).toLocaleString('es-CO');
+}
+
+export function parseAmount(formatted: string): number {
+  const digits = formatted.replace(/\D/g, '');
+  return digits ? Number(digits) : 0;
 }
 
 /** '2026-07-03' → '3 jul' */

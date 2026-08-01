@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fmt, todayIso } from '../lib/format';
+import { fmt, groupDigits, parseAmount, todayIso } from '../lib/format';
 import type { AbonoTarget, Category, Debt, Goal } from '../types';
 import {
   amountInput, cancelBtn, chipStyle, confirmBtn, dashedBtn, field, formCard, kicker, label, screen, submitBtn, title,
@@ -56,12 +56,15 @@ function AmountField({ value, onChange, label: lbl }: { value: string; onChange:
         }}
       >
         <span style={{ fontSize: 26, color: 'var(--mp-muted)' }}>$</span>
+        {/* Texto, no number: un input numérico no deja pintar los puntos de
+            millar mientras se escribe. inputMode mantiene el teclado numérico. */}
         <input
-          type="number"
-          inputMode="decimal"
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
           placeholder="0"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(groupDigits(e.target.value))}
           style={amountInput}
         />
       </div>
@@ -94,8 +97,8 @@ export default function AddScreen({
     }
   }, [categories, categoryId, abMethodId]);
 
-  const amountNum = parseFloat(amount);
-  const abAmountNum = parseFloat(abAmount);
+  const amountNum = parseAmount(amount);
+  const abAmountNum = parseAmount(abAmount);
 
   const debtOptions: AbonoOption[] = debts.map((d) => ({
     kind: 'debt', id: d.id, name: d.name, total: d.total, current: d.paid,

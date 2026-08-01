@@ -200,6 +200,20 @@ $$;
 -- Derived, not stored: the active month starts the day the last close ended,
 -- or at the top of the current calendar month for a brand-new account.
 
+-- Today in the app's timezone. `current_date` is UTC on the server, which in
+-- Colombia rolls the month over at 7pm on the last day — see migration 003.
+create or replace function public.app_today()
+returns date
+language sql
+stable
+as $$
+  select (now() at time zone 'America/Bogota')::date;
+$$;
+
+-- The active month, in order of preference: where the last close ended; the
+-- month of the oldest still-open movement (anchors the active month to the
+-- DATA, not the calendar, so an unclosed July stays July); otherwise the
+-- plain calendar month, for an account with nothing in it yet.
 create or replace function public.active_month_start()
 returns date
 language sql
@@ -209,8 +223,46 @@ set search_path = public
 as $$
   select coalesce(
     (select max(period_end) from public.monthly_closes where user_id = auth.uid()),
-    date_trunc('month', current_date)::date
+    (select date_trunc('month', min(occurred_on))::date
+       from public.transactions
+      where user_id = auth.uid() and closed_month_id is null),
+    date_trunc('month', public.app_today())::date
   );
+$$;
+
+-- Called when the app loads. A month stays open until the 5th of the next one,
+-- so late entries still land in the right place; past that, this performs the
+-- close for real rather than just relabelling, which is what used to let one
+-- month's spending bleed into the next.
+create or replace function public.sync_active_month()
+returns date
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid      uuid := auth.uid();
+  guard    integer := 0;
+  p_from   date;
+  deadline date;
+begin
+  if uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  loop
+    guard := guard + 1;
+    exit when guard > 36;   -- backstop, not an expected limit
+
+    p_from := public.active_month_start();
+    deadline := (p_from + interval '1 month' + interval '4 days')::date;
+    exit when public.app_today() < deadline;
+
+    perform public.close_month();
+  end loop;
+
+  return public.active_month_start();
+end;
 $$;
 
 create or replace function public.month_label(d date)
@@ -368,8 +420,12 @@ create policy monthly_closes_read on public.monthly_closes
 -- callable by a role that has no business calling it.
 revoke execute on function public.close_month()            from public, anon;
 revoke execute on function public.active_month_start()     from public, anon;
+revoke execute on function public.sync_active_month()      from public, anon;
+revoke execute on function public.app_today()              from public, anon;
 revoke execute on function public.recalc_category_totals() from public, anon;
 
 grant execute on function public.close_month()            to authenticated;
 grant execute on function public.active_month_start()     to authenticated;
+grant execute on function public.sync_active_month()      to authenticated;
+grant execute on function public.app_today()              to authenticated;
 grant execute on function public.recalc_category_totals() to authenticated;
