@@ -61,6 +61,11 @@ export type MonthlyClose = {
   category_totals: ArchivedCategory[];
 };
 
+export type Profile = {
+  nickname: string | null;
+  avatar: string;
+};
+
 export type Screen =
   | 'home'
   | 'add'

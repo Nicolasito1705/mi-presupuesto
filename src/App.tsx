@@ -278,7 +278,10 @@ export default function App() {
         <HistoryScreen
           closes={budget.closes}
           email={session.user.email ?? ''}
+          profile={budget.profile}
+          busy={budget.busy}
           onOpen={(id) => { setArchiveId(id); setScreen('archive'); }}
+          onSaveProfile={budget.saveProfile}
           onSignOut={() => void supabase.auth.signOut()}
         />
       )}

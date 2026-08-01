@@ -1,15 +1,21 @@
 import { fmt } from '../lib/format';
-import type { MonthlyClose } from '../types';
+import ProfileCard from '../components/ProfileCard';
+import type { MonthlyClose, Profile } from '../types';
 import { card, screen, title } from '../ui';
 
 type Props = {
   closes: MonthlyClose[];
   email: string;
+  profile: Profile;
+  busy: boolean;
   onOpen: (id: string) => void;
+  onSaveProfile: (i: { nickname: string; avatar: string }) => Promise<boolean>;
   onSignOut: () => void;
 };
 
-export default function HistoryScreen({ closes, email, onOpen, onSignOut }: Props) {
+export default function HistoryScreen({
+  closes, email, profile, busy, onOpen, onSaveProfile, onSignOut,
+}: Props) {
   return (
     <div data-screen-label="Historial" style={screen}>
       <div style={{ paddingTop: 6 }}>
@@ -60,27 +66,14 @@ export default function HistoryScreen({ closes, email, onOpen, onSignOut }: Prop
         )}
       </div>
 
-      {/* The design has no settings surface; sign-out lives here, where the
-          list ends, rather than intruding on the dashboard header. */}
-      <div
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 8, padding: '4px 2px 8px', fontSize: 12, color: 'var(--mp-muted)',
-        }}
-      >
-        <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {email}
-        </span>
-        <button
-          onClick={onSignOut}
-          style={{
-            border: 'none', background: 'transparent', color: 'var(--color-accent)', fontSize: 12.5,
-            fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', padding: '6px 0',
-          }}
-        >
-          Cerrar sesión
-        </button>
-      </div>
+      <ProfileCard
+        profile={profile}
+        email={email}
+        busy={busy}
+        onSave={onSaveProfile}
+        onSignOut={onSignOut}
+      />
+
     </div>
   );
 }

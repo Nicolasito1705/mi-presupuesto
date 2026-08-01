@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { slugify } from '../lib/format';
-import type { Category, Debt, Goal, MonthlyClose, Transaction } from '../types';
+import type { Category, Debt, Goal, MonthlyClose, Profile, Transaction } from '../types';
+import { DEFAULT_AVATAR } from '../lib/avatars';
 
 /** Palette the prototype hands to categories created after the seeded four. */
 const EXTRA_COLORS = ['#796cbf', '#d2cefd', '#595d6c', '#e7e5fe', '#423a6a', '#b2b6ca'];
@@ -24,6 +25,7 @@ export function useBudget(userId: string | null) {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [closes, setCloses] = useState<MonthlyClose[]>([]);
+  const [profile, setProfile] = useState<Profile>({ nickname: null, avatar: DEFAULT_AVATAR });
   const [activeMonthStart, setActiveMonthStart] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -41,7 +43,13 @@ export function useBudget(userId: string | null) {
     // Must run BEFORE the reads, not alongside them: when the active month is
     // past its grace period this performs the close, and reads issued in
     // parallel would race it and return the pre-close state.
-    const ams = await supabase.rpc('sync_active_month');
+    //
+    // Falls back to the older read-only function when the database has not had
+    // migration 003 applied yet. A frontend deploy must never hard-require a
+    // migration to have landed first — that combination bricks the app on load
+    // instead of degrading, which is exactly what happened once.
+    let ams = await supabase.rpc('sync_active_month');
+    if (ams.error) ams = await supabase.rpc('active_month_start');
     if (ams.error) return ams.error;
 
     const [cats, txs, dbt, gls, cls] = await Promise.all([
@@ -59,6 +67,16 @@ export function useBudget(userId: string | null) {
 
     const firstError = cats.error || txs.error || dbt.error || gls.error || cls.error;
     if (firstError) return firstError;
+
+    // Read separately and never fatally: the profile is cosmetic, and a
+    // database without migration 004 should still show the whole budget.
+    const prof = await supabase.from('profiles').select('nickname, avatar').maybeSingle();
+    if (alive.current && !prof.error) {
+      setProfile({
+        nickname: prof.data?.nickname ?? null,
+        avatar: prof.data?.avatar ?? DEFAULT_AVATAR,
+      });
+    }
     if (!alive.current) return null;
 
     setCategories(
@@ -266,6 +284,17 @@ export function useBudget(userId: string | null) {
     [mutate, userId],
   );
 
+  const saveProfile = useCallback(
+    (input: { nickname: string; avatar: string }) =>
+      mutate(() =>
+        supabase.from('profiles').upsert(
+          { user_id: userId, nickname: input.nickname.trim() || null, avatar: input.avatar },
+          { onConflict: 'user_id' },
+        ),
+      ),
+    [mutate, userId],
+  );
+
   const deleteGoal = useCallback(
     (id: string) => mutate(() => supabase.from('goals').delete().eq('id', id)),
     [mutate],
@@ -282,8 +311,8 @@ export function useBudget(userId: string | null) {
   );
 
   return {
-    categories, transactions, debts, goals, closes, activeMonthStart,
-    loading, busy, error, setError, refresh,
+    categories, transactions, debts, goals, closes, activeMonthStart, profile,
+    loading, busy, error, setError, refresh, saveProfile,
     addExpense, addIncome, addDebtPayment, addGoalContribution, deleteTransaction,
     createCategory, createDebt, deleteDebt, createGoal, deleteGoal, closeMonth,
   };
