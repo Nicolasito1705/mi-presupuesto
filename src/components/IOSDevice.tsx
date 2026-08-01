@@ -88,7 +88,12 @@ export default function IOSDevice({ children, dark = false, bare = false, width 
       )}
 
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>{children}</div>
+        {/* La capa entre el panel que scrollea y el documento. `contain` aquí
+            también, para que ningún gesto pueda escaparse hacia la página por
+            este nivel intermedio. */}
+        <div style={{ flex: 1, overflow: 'auto', minHeight: 0, overscrollBehavior: 'contain' }}>
+          {children}
+        </div>
       </div>
 
       {!bare && (

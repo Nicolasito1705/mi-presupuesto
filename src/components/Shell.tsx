@@ -32,7 +32,12 @@ export default function Shell({ theme, narrow, error, onDismissError, footer, ov
         >
           <div
             style={{
-              flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column',
+              flex: 1, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column',
+              // Corta la cadena de scroll: al llegar al tope de esta lista el
+              // gesto se detiene aquí en vez de pasarle el movimiento al
+              // documento, que es lo que producía el rebote de toda la página.
+              overscrollBehaviorY: 'contain',
+              WebkitOverflowScrolling: 'touch',
               padding: narrow ? 'calc(env(safe-area-inset-top) + 16px) 16px 12px' : '64px 16px 12px',
             }}
           >

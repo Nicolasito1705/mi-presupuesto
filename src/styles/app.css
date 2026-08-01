@@ -75,4 +75,26 @@ input[type="number"] { -moz-appearance: textfield; }
 
 @media (max-width: 480px) {
   .mp-stage { padding: 0; align-items: stretch; }
+
+  /* En el teléfono el documento no se mueve: se mueve el panel interno.
+     Sin esto, arrastrar dentro de una lista encadena el scroll hacia arriba y
+     rebota la página entera — la sensación de que la app "se quiere salir".
+
+     Va dentro de la media query a propósito: en escritorio el documento SÍ
+     debe poder scrollear, o una ventana más baja que los 874px del marco
+     dejaría el teléfono dibujado cortado y sin forma de bajarlo. */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  #root { height: 100%; }
+}
+
+/* Solo gestos verticales. `pinch-zoom` se mantiene a propósito: quitar el
+   zoom por pellizco rompe la accesibilidad de quien necesita agrandar. */
+.mp-stage {
+  touch-action: pan-y pinch-zoom;
+  overflow-x: hidden;
 }
