@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { fmt, todayIso } from '../lib/format';
-import type { Category, Debt } from '../types';
+import type { AbonoTarget, Category, Debt, Goal } from '../types';
 import {
-  amountInput, cancelBtn, chipStyle, confirmBtn, dashedBtn, field, formCard, label, screen, submitBtn, title,
+  amountInput, cancelBtn, chipStyle, confirmBtn, dashedBtn, field, formCard, kicker, label, screen, submitBtn, title,
 } from '../ui';
 
 export type AddMode = 'gasto' | 'abono' | 'ingreso';
@@ -10,22 +10,26 @@ export type AddMode = 'gasto' | 'abono' | 'ingreso';
 type Props = {
   categories: Category[];
   debts: Debt[];
+  goals: Goal[];
   mode: AddMode;
   onMode: (m: AddMode) => void;
-  abonoDebtId: string | null;
-  onAbonoDebt: (id: string) => void;
+  abonoTarget: AbonoTarget | null;
+  onAbonoTarget: (t: AbonoTarget) => void;
   busy: boolean;
   onSubmitExpense: (i: { categoryId: string; amount: number; description: string; date: string }) => Promise<boolean>;
   onSubmitIncome: (i: { amount: number; description: string; date: string }) => Promise<boolean>;
-  onSubmitAbono: (i: { debtId: string; debtName: string; categoryId: string; amount: number; date: string }) => Promise<boolean>;
+  onSubmitAbono: (i: { target: AbonoTarget; name: string; categoryId: string; amount: number; date: string }) => Promise<boolean>;
   onCreateCategory: (name: string) => Promise<boolean>;
 };
 
 const TITLES: Record<AddMode, string> = {
   gasto: 'Agregar gasto',
-  abono: 'Abonar a deuda',
+  abono: 'Abonar',
   ingreso: 'Registrar ingreso',
 };
+
+/** A debt and a goal are the same shape to the abono form: a thing you fund. */
+type AbonoOption = AbonoTarget & { name: string; hint: string; remaining: number; total: number; current: number };
 
 function ModeTab({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
   return (
@@ -66,7 +70,7 @@ function AmountField({ value, onChange, label: lbl }: { value: string; onChange:
 }
 
 export default function AddScreen({
-  categories, debts, mode, onMode, abonoDebtId, onAbonoDebt, busy,
+  categories, debts, goals, mode, onMode, abonoTarget, onAbonoTarget, busy,
   onSubmitExpense, onSubmitIncome, onSubmitAbono, onCreateCategory,
 }: Props) {
   const [amount, setAmount] = useState('');
@@ -92,11 +96,25 @@ export default function AddScreen({
 
   const amountNum = parseFloat(amount);
   const abAmountNum = parseFloat(abAmount);
-  const abDebt = debts.find((d) => d.id === abonoDebtId) ?? debts[0];
+
+  const debtOptions: AbonoOption[] = debts.map((d) => ({
+    kind: 'debt', id: d.id, name: d.name, total: d.total, current: d.paid,
+    remaining: Math.max(0, d.total - d.paid),
+    hint: `restan ${fmt(Math.max(0, d.total - d.paid))}`,
+  }));
+  const goalOptions: AbonoOption[] = goals.map((g) => ({
+    kind: 'goal', id: g.id, name: g.name, total: g.target, current: g.saved,
+    remaining: Math.max(0, g.target - g.saved),
+    hint: `faltan ${fmt(Math.max(0, g.target - g.saved))}`,
+  }));
+  const options = [...debtOptions, ...goalOptions];
+
+  const selected =
+    options.find((o) => o.kind === abonoTarget?.kind && o.id === abonoTarget?.id) ?? options[0];
 
   const canSubmitExpense = amountNum > 0 && desc.trim().length > 0 && !!categoryId;
   const canSubmitIncome = amountNum > 0 && desc.trim().length > 0;
-  const canAbonar = !!abDebt && abAmountNum > 0 && !!abMethodId;
+  const canAbonar = !!selected && abAmountNum > 0 && !!abMethodId;
 
   async function submitExpense() {
     if (!canSubmitExpense || busy) return;
@@ -111,10 +129,13 @@ export default function AddScreen({
   }
 
   async function submitAbono() {
-    if (!canAbonar || busy || !abDebt) return;
+    if (!canAbonar || busy || !selected) return;
     const ok = await onSubmitAbono({
-      debtId: abDebt.id, debtName: abDebt.name, categoryId: abMethodId,
-      amount: abAmountNum, date: abDate,
+      target: { kind: selected.kind, id: selected.id },
+      name: selected.name,
+      categoryId: abMethodId,
+      amount: abAmountNum,
+      date: abDate,
     });
     if (ok) setAbAmount('');
   }
@@ -141,29 +162,38 @@ export default function AddScreen({
           <AmountField label="Monto del abono" value={abAmount} onChange={setAbAmount} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <label style={label}>Deuda</label>
-            {debts.length === 0 && (
+            <label style={label}>¿A qué le abonas?</label>
+
+            {options.length === 0 && (
               <div style={{ fontSize: 13, color: 'var(--mp-muted)', textWrap: 'pretty' }}>
-                Todavía no tienes deudas. Créalas en la pestaña Deudas.
+                Todavía no tienes deudas ni metas. Créalas en la pestaña Deudas.
               </div>
             )}
-            {debts.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => onAbonoDebt(d.id)}
-                style={{
-                  minHeight: 48, borderRadius: 10, ...chipStyle(abDebt?.id === d.id),
-                  color: 'var(--color-text)', fontSize: 13.5, fontWeight: 500, cursor: 'pointer',
-                  fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center',
-                  justifyContent: 'space-between', gap: 8, padding: '0 14px', textAlign: 'left',
-                }}
-              >
-                <span>{d.name}</span>
-                <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--mp-muted)' }}>
-                  restan {fmt(Math.max(0, d.total - d.paid))}
-                </span>
-              </button>
-            ))}
+
+            {([['Deudas', debtOptions], ['Metas de ahorro', goalOptions]] as const).map(
+              ([heading, group]) =>
+                group.length === 0 ? null : (
+                  <div key={heading} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ ...kicker, marginTop: 2 }}>{heading}</div>
+                    {group.map((o) => (
+                      <button
+                        key={`${o.kind}-${o.id}`}
+                        onClick={() => onAbonoTarget({ kind: o.kind, id: o.id })}
+                        style={{
+                          minHeight: 48, borderRadius: 10,
+                          ...chipStyle(selected?.kind === o.kind && selected?.id === o.id),
+                          color: 'var(--color-text)', fontSize: 13.5, fontWeight: 500, cursor: 'pointer',
+                          fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center',
+                          justifyContent: 'space-between', gap: 8, padding: '0 14px', textAlign: 'left',
+                        }}
+                      >
+                        <span>{o.name}</span>
+                        <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--mp-muted)' }}>{o.hint}</span>
+                      </button>
+                    ))}
+                  </div>
+                ),
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -192,15 +222,16 @@ export default function AddScreen({
             <input type="date" value={abDate} onChange={(e) => setAbDate(e.target.value)} style={field} />
           </div>
 
-          {canAbonar && abDebt && (
+          {canAbonar && selected && (
             <div style={{ fontSize: 12.5, color: 'var(--mp-muted)', textWrap: 'pretty' }}>
-              Después de este abono habrás pagado {fmt(Math.min(abDebt.total, abDebt.paid + abAmountNum))} de{' '}
-              {fmt(abDebt.total)} ({Math.min(100, Math.round(((abDebt.paid + abAmountNum) / abDebt.total) * 100))}%).
+              {selected.kind === 'debt'
+                ? `Después de este abono habrás pagado ${fmt(Math.min(selected.total, selected.current + abAmountNum))} de ${fmt(selected.total)} (${Math.min(100, Math.round(((selected.current + abAmountNum) / selected.total) * 100))}%).`
+                : `Después de este abono llevarás ${fmt(selected.current + abAmountNum)} ahorrados de ${fmt(selected.total)} (${Math.round(((selected.current + abAmountNum) / selected.total) * 100)}%). Cuenta como gasto del mes, porque ese dinero ya no está disponible.`}
             </div>
           )}
 
           <button onClick={submitAbono} disabled={!canAbonar || busy} className="mp-h-accent12" style={submitBtn}>
-            Registrar abono
+            {selected?.kind === 'goal' ? 'Registrar ahorro' : 'Registrar abono'}
           </button>
         </div>
       )}

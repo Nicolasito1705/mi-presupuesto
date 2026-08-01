@@ -11,10 +11,14 @@ export type Category = {
 
 export type TransactionKind = 'expense' | 'income';
 
+/** An abono targets a debt or a goal — never both (enforced by a check constraint). */
+export type AbonoTarget = { kind: 'debt' | 'goal'; id: string };
+
 export type Transaction = {
   id: string;
   category_id: string | null;
   debt_id: string | null;
+  goal_id: string | null;
   closed_month_id: string | null;
   kind: TransactionKind;
   group_name: string;

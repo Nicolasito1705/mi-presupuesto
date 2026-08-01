@@ -5,7 +5,7 @@ import { isConfigured, supabase } from './lib/supabase';
 import { useBudget } from './hooks/useBudget';
 import { categoryRows, donutGradient, totals as sumTotals } from './lib/derive';
 import { monthLabel, nextMonthLower } from './lib/format';
-import type { Screen, Transaction } from './types';
+import type { AbonoTarget, Screen, Transaction } from './types';
 
 import Shell from './components/Shell';
 import TabBar from './components/TabBar';
@@ -68,7 +68,7 @@ export default function App() {
   const [detailCatId, setDetailCatId] = useState<string | null>(null);
   const [archiveId, setArchiveId] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<AddMode>('gasto');
-  const [abonoDebtId, setAbonoDebtId] = useState<string | null>(null);
+  const [abonoTarget, setAbonoTarget] = useState<AbonoTarget | null>(null);
   const [confirmClose, setConfirmClose] = useState(false);
 
   const [archMovements, setArchMovements] = useState<Transaction[]>([]);
@@ -90,7 +90,7 @@ export default function App() {
         if (error) setError(error.message);
         setArchMovements(
           (data ?? []).map((t) => ({
-            id: t.id, category_id: t.category_id, debt_id: t.debt_id,
+            id: t.id, category_id: t.category_id, debt_id: t.debt_id, goal_id: t.goal_id,
             closed_month_id: t.closed_month_id, kind: t.kind, group_name: t.group_name,
             description: t.description, amount: Number(t.amount), occurred_on: t.occurred_on,
           })),
@@ -195,10 +195,11 @@ export default function App() {
         <AddScreen
           categories={budget.categories}
           debts={budget.debts}
+          goals={budget.goals}
           mode={addMode}
           onMode={setAddMode}
-          abonoDebtId={abonoDebtId}
-          onAbonoDebt={setAbonoDebtId}
+          abonoTarget={abonoTarget}
+          onAbonoTarget={setAbonoTarget}
           busy={budget.busy}
           onSubmitExpense={async (i) => {
             const ok = await budget.addExpense(i);
@@ -211,7 +212,16 @@ export default function App() {
             return ok;
           }}
           onSubmitAbono={async (i) => {
-            const ok = await budget.addDebtPayment(i);
+            const ok =
+              i.target.kind === 'debt'
+                ? await budget.addDebtPayment({
+                    debtId: i.target.id, debtName: i.name, categoryId: i.categoryId,
+                    amount: i.amount, date: i.date,
+                  })
+                : await budget.addGoalContribution({
+                    goalId: i.target.id, goalName: i.name, categoryId: i.categoryId,
+                    amount: i.amount, date: i.date,
+                  });
             if (ok) setScreen('debts');
             return ok;
           }}
@@ -235,7 +245,8 @@ export default function App() {
           debts={budget.debts}
           goals={budget.goals}
           busy={budget.busy}
-          onAbonar={(id) => { setAbonoDebtId(id); setAddMode('abono'); setScreen('add'); }}
+          onAbonarDebt={(id) => { setAbonoTarget({ kind: 'debt', id }); setAddMode('abono'); setScreen('add'); }}
+          onAbonarGoal={(id) => { setAbonoTarget({ kind: 'goal', id }); setAddMode('abono'); setScreen('add'); }}
           onCreateDebt={budget.createDebt}
           onDeleteDebt={budget.deleteDebt}
           onCreateGoal={budget.createGoal}

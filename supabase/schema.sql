@@ -72,7 +72,9 @@ create table if not exists public.transactions (
   id              uuid primary key default gen_random_uuid(),
   user_id         uuid not null references auth.users (id) on delete cascade,
   category_id     uuid references public.categories (id) on delete cascade,
+  -- Un movimiento puede financiar una deuda o una meta (nunca las dos).
   debt_id         uuid references public.debts (id) on delete set null,
+  goal_id         uuid references public.goals (id) on delete set null,
   closed_month_id uuid references public.monthly_closes (id) on delete cascade,
   kind            text not null default 'expense' check (kind in ('expense', 'income')),
   group_name      text not null default 'General',
@@ -82,13 +84,17 @@ create table if not exists public.transactions (
   created_at      timestamptz not null default now(),
   -- an expense always lands in a category; income may be uncategorised
   constraint transactions_expense_needs_category
-    check (kind = 'income' or category_id is not null)
+    check (kind = 'income' or category_id is not null),
+  constraint transactions_one_target
+    check (debt_id is null or goal_id is null)
 );
 
 create index if not exists transactions_active_idx
   on public.transactions (user_id, closed_month_id, occurred_on);
 create index if not exists transactions_category_idx
   on public.transactions (category_id) where closed_month_id is null;
+create index if not exists transactions_goal_idx
+  on public.transactions (goal_id) where goal_id is not null;
 create index if not exists monthly_closes_user_idx
   on public.monthly_closes (user_id, period_start desc);
 
@@ -105,6 +111,7 @@ as $$
 declare
   old_counts boolean := false;   -- did OLD contribute to a category total?
   new_counts boolean := false;
+  target_changed boolean := false;
 begin
   if tg_op in ('UPDATE', 'DELETE') then
     old_counts := old.closed_month_id is null
@@ -115,6 +122,11 @@ begin
     new_counts := new.closed_month_id is null
               and new.kind = 'expense'
               and new.category_id is not null;
+  end if;
+  if tg_op = 'UPDATE' then
+    target_changed := old.debt_id is distinct from new.debt_id
+                   or old.goal_id is distinct from new.goal_id
+                   or old.amount <> new.amount;
   end if;
 
   -- category totals: back out the old contribution, add the new one
@@ -129,21 +141,31 @@ begin
      where id = new.category_id;
   end if;
 
-  -- debt progress: only when the abono itself actually changed
-  if tg_op = 'DELETE' or (tg_op = 'UPDATE'
-       and (old.debt_id is distinct from new.debt_id or old.amount <> new.amount)) then
+  -- debt and goal progress: only when the abono itself actually changed.
+  -- Debt payment is clamped at the total (you cannot owe less than nothing);
+  -- saving is not clamped at the target — overshooting a goal is good news.
+  if tg_op = 'DELETE' or (tg_op = 'UPDATE' and target_changed) then
     if old.debt_id is not null then
       update public.debts
          set paid = greatest(0, paid - old.amount)
        where id = old.debt_id;
     end if;
+    if old.goal_id is not null then
+      update public.goals
+         set saved = greatest(0, saved - old.amount)
+       where id = old.goal_id;
+    end if;
   end if;
-  if tg_op = 'INSERT' or (tg_op = 'UPDATE'
-       and (old.debt_id is distinct from new.debt_id or old.amount <> new.amount)) then
+  if tg_op = 'INSERT' or (tg_op = 'UPDATE' and target_changed) then
     if new.debt_id is not null then
       update public.debts
          set paid = least(total, paid + new.amount)
        where id = new.debt_id;
+    end if;
+    if new.goal_id is not null then
+      update public.goals
+         set saved = saved + new.amount
+       where id = new.goal_id;
     end if;
   end if;
 

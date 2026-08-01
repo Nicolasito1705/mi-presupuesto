@@ -10,7 +10,8 @@ type Props = {
   debts: Debt[];
   goals: Goal[];
   busy: boolean;
-  onAbonar: (debtId: string) => void;
+  onAbonarDebt: (debtId: string) => void;
+  onAbonarGoal: (goalId: string) => void;
   onCreateDebt: (i: { name: string; total: number; paid: number }) => Promise<boolean>;
   onDeleteDebt: (id: string) => void;
   onCreateGoal: (i: { name: string; target: number; saved: number }) => Promise<boolean>;
@@ -18,7 +19,7 @@ type Props = {
 };
 
 export default function DebtsScreen({
-  debts, goals, busy, onAbonar, onCreateDebt, onDeleteDebt, onCreateGoal, onDeleteGoal,
+  debts, goals, busy, onAbonarDebt, onAbonarGoal, onCreateDebt, onDeleteDebt, onCreateGoal, onDeleteGoal,
 }: Props) {
   const [pendingDebtDel, setPendingDebtDel] = useState<string | null>(null);
   const [pendingGoalDel, setPendingGoalDel] = useState<string | null>(null);
@@ -113,7 +114,7 @@ export default function DebtsScreen({
               </div>
             )}
 
-            <button onClick={() => onAbonar(d.id)} style={{ ...linkBtn, alignSelf: 'flex-start', padding: '6px 0' }}>
+            <button onClick={() => onAbonarDebt(d.id)} style={{ ...linkBtn, alignSelf: 'flex-start', padding: '6px 0' }}>
               <i className="ph ph-plus-circle" />
               Abonar
             </button>
@@ -202,6 +203,11 @@ export default function DebtsScreen({
                 </button>
               </div>
             )}
+
+            <button onClick={() => onAbonarGoal(g.id)} style={{ ...linkBtn, alignSelf: 'flex-start', padding: '6px 0' }}>
+              <i className="ph ph-plus-circle" />
+              Abonar
+            </button>
           </div>
         );
       })}

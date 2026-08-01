@@ -38,8 +38,11 @@ Nothing important is computed in the browser and cached.
 - **`categories.total`** is a real column. A trigger on `transactions` moves it on every
   insert, update and delete, so the dashboard shows what the database holds. The donut
   chart is drawn from those totals.
-- **An abono** is just a transaction carrying a `debt_id`. The same trigger advances
-  `debts.paid`, clamped at the debt's total.
+- **An abono** is just a transaction carrying a `debt_id` or a `goal_id` (never both —
+  a check constraint enforces it). The same trigger advances `debts.paid`, clamped at
+  the debt's total, or `goals.saved`, deliberately *not* clamped: overshooting a savings
+  goal is good news. Funding a goal counts as an expense, because that money has left
+  the month's available pool.
 - **`close_month()`** runs as one transaction: it snapshots the month into
   `monthly_closes` (income, expense, balance, and a frozen per-category breakdown),
   stamps every active transaction with that snapshot's id, and zeroes the category
@@ -75,8 +78,9 @@ needs them:
 
 - **An "Ingreso" tab** in Agregar. Income is stored as transactions (`kind = 'income'`),
   so there has to be a way to enter it; the prototype read income from a fixed prop.
-- **A "Nueva meta" form** on the Deudas screen, mirroring the existing debt form. The
-  prototype rendered goals but had no way to create one.
+- **Savings goals you can actually fund** — a "Nueva meta" form and an "Abonar" action,
+  both mirroring the debt equivalents. The prototype rendered goals as static bars with
+  no way to create or feed one.
 - **Sign-out**, at the bottom of Historial. The design has no settings surface.
 
 Below 480px the iPhone bezel is dropped and the app goes full-bleed — on a real phone a

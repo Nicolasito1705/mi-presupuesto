@@ -65,7 +65,7 @@ export function useBudget(userId: string | null) {
     );
     setTransactions(
       (txs.data ?? []).map((t) => ({
-        id: t.id, category_id: t.category_id, debt_id: t.debt_id,
+        id: t.id, category_id: t.category_id, debt_id: t.debt_id, goal_id: t.goal_id,
         closed_month_id: t.closed_month_id, kind: t.kind, group_name: t.group_name,
         description: t.description, amount: num(t.amount), occurred_on: t.occurred_on,
       })),
@@ -195,6 +195,28 @@ export function useBudget(userId: string | null) {
     [mutate, userId],
   );
 
+  /**
+   * Funding a goal is the mirror image of paying a debt: an expense carrying
+   * goal_id, which the same trigger applies to `goals.saved`. It counts as an
+   * expense on purpose — the money left the month's available pool.
+   */
+  const addGoalContribution = useCallback(
+    (input: { goalId: string; goalName: string; categoryId: string; amount: number; date: string }) =>
+      mutate(() =>
+        supabase.from('transactions').insert({
+          user_id: userId,
+          category_id: input.categoryId,
+          goal_id: input.goalId,
+          kind: 'expense',
+          group_name: 'Ahorro',
+          description: 'Abono a ' + input.goalName,
+          amount: input.amount,
+          occurred_on: input.date,
+        }),
+      ),
+    [mutate, userId],
+  );
+
   const deleteTransaction = useCallback(
     (id: string) => mutate(() => supabase.from('transactions').delete().eq('id', id)),
     [mutate],
@@ -258,7 +280,7 @@ export function useBudget(userId: string | null) {
   return {
     categories, transactions, debts, goals, closes, activeMonthStart,
     loading, busy, error, setError, refresh,
-    addExpense, addIncome, addDebtPayment, deleteTransaction,
+    addExpense, addIncome, addDebtPayment, addGoalContribution, deleteTransaction,
     createCategory, createDebt, deleteDebt, createGoal, deleteGoal, closeMonth,
   };
 }
